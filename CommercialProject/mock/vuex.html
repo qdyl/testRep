@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vuex 的使用</title>
+  <script src="../node_modules/vue/dist/vue.js"></script>
+  <script src="../node_modules/vuex/dist/vuex.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h2>{{msg}}</h2>
+    <a href="#" @click="add">加++</a>
+    <counter></counter>
+  </div>
+</body>
+<script>
+  // 定义子组件
+  const counter = {
+    template: `
+    <div>
+      <div>{{counts}}</div>
+      <div>{{updateUserName}}</div>
+    </div>
+    `,
+    computed: {  // 要在组件内部使用 store，就必须定义计算属性
+      counts () {
+        return this.$store.state.count  // 由于 store 已经注册到了根组件下，所以只要是根组件的子组件，都可以获得this.$store.state属性
+      },
+      updateUserName () {
+        return this.$store.getters.updateName
+      }
+    }
+  }
+  // 定义 store
+  const store = new Vuex.Store({
+    state: {
+      count: 10,
+      userName: 'yq'
+    },
+    getters: {
+      updateName (state) {
+        return state.userName + 'Hello'
+      }
+    },
+    mutations: {
+      addCount (state, num) {
+        state.count += num
+      }
+    },
+    actions: { // 跟 mutations 一样，只会定义，不会触发
+      addCountAction (context, num) {
+        context.commit('addCount', num)
+      }
+    }
+  })
+  new Vue({
+    el: '#app',
+    store,
+    data: {
+      msg: 'Vuex 的使用'
+    },
+    components: {
+      counter  // 把子组件注册到根组件中。这样子组件也就有了 vuex 的功能。
+    },
+    methods: {
+      add () {
+        this.$store.dispatch('addCountAction', 5)
+      }
+    }
+  })
+</script>
+</html>

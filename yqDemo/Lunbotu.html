@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>自己实现轮播图</title>
+    <style>
+        #container {
+            width:1280px;
+            height:720px;
+            overflow: hidden;
+        }
+        .main {
+            position: relative;
+            width:6400px;
+            height:720px;
+        }
+        .button {
+            position: fixed;
+            left:300px;
+            top:300px;
+        }
+        button {
+            padding:10px;
+        }
+        .next {
+            position: relative;
+            /*float: right;*/
+            left:570px;
+        }
+        .circles {
+            position: fixed;
+            left:580px;
+            top: 500px;
+        }
+        i {
+            display: inline-block;
+            margin:0 10px;
+            width:15px;
+            height:15px;
+            border:1px;
+            border-radius: 50%;
+            background: #fff;
+        }
+        .on {
+            background: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="main" style="left: -1280px;">
+            <img src="./img/banner3.jpg" alt=""><img src="./img/banner1.jpg" alt=""><img src="./img/banner2.jpg" alt=""><img src="./img/banner3.jpg" alt=""><img src="./img/banner1.jpg" alt="">
+        </div>
+        <div class="button">
+            <button class="pre">《</button>
+            <button class="next">》</button>
+        </div>
+        <div class="circles">
+            <i index="0"></i>
+            <i index="1"></i>
+            <i index="2"></i>
+        </div>
+    </div>
+</body>
+<script>
+    let
+        container = document.getElementById('container'),
+        main = document.getElementsByClassName('main')[0],
+        preButton = document.getElementsByClassName('pre')[0],
+        nextButton = document.getElementsByClassName('next')[0],
+        iButtons = document.getElementsByTagName('i'),
+        index = 0,
+        timer,
+        animated = false
+    ;
+    // todo : 轮播动画函数
+    function animate(offset) {
+        animated = true; // 说明开始位移
+        let newLeft = parseInt(main.style.left) + offset,
+            speed = offset/30
+        ;
+        function go() {
+            if ((speed > 0 && newLeft > parseInt(main.style.left))||(speed < 0 && newLeft < parseInt(main.style.left))) {
+                main.style.left = parseInt(main.style.left) + speed + 'px';
+                setTimeout(go,15)
+            } else {
+                animated = false;// 说明停止位移
+                main.style.left = newLeft + 'px';
+                if (newLeft > -1280) {
+                    main.style.left = -3840 + 'px'
+                }
+                if (newLeft < -3840) {
+                    main.style.left = -1280 + 'px'
+                }
+            }
+        }
+        go();
+    }
+    // 点击左箭头
+    preButton.addEventListener('click',function () {
+        index -=1;
+        if (index<0) {
+            index=2
+        }
+        showButton();
+        if(!animated){ // 只有停止动画了，就开始下一个动画
+            animate(1280);
+        }
+    });
+    // 点击右箭头
+    nextButton.addEventListener('click',function () {
+        index +=1;
+        if (index>2) {
+            index=0
+        }
+        showButton();
+        if(!animated){ // 只有停止动画了，就开始下一个动画
+            animate(-1280);
+        }
+    });
+    // todo : 按钮样式切换
+    function showButton() {
+        for (let i = 0;i<iButtons.length;i++) {
+            if (iButtons[i].className === 'on') {
+                iButtons[i].className ='';
+                break;
+            }
+        }
+        iButtons[index].className = 'on';
+    }
+    showButton();
+    // 点击按钮，来切换图片
+    for (let i=0;i<iButtons.length;i++) {
+        iButtons[i].addEventListener('click',function () {
+            if (this.className === 'on') { // 如果点击的图标，对应的图片已经显示了，就不做处理。这样可以降低性能。
+                return;
+            }
+            let myIndex = this.getAttribute('index');// this, 就是e.target
+            console.log('myIndex',myIndex,'index',index);
+            let newOffset = -1280 * (myIndex - index);
+            animate(newOffset);
+            index = myIndex; // 这一步很关键：要即时更新index 的值
+            showButton();// 切换样式
+        })
+    }
+    // todo: 实现自动轮播
+    container.addEventListener('mouseover',function () {
+        clearInterval(timer);
+    });
+    container.addEventListener('mouseout',function () {
+        play();
+    });
+
+    function play() {
+        timer = setInterval(function () {
+            animate(-1280);
+        },3000)
+    }
+    play();
+
+
+</script>
+</html>
